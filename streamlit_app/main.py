@@ -4,10 +4,24 @@ import numpy as np
 import io
 import xlsxwriter
 
+#name = st.text_input("Enter Name")
+highticketstring = st.text_input("Enter value INTEGER ONLY", key="placeholder")
 
 uploaded_file = st.file_uploader("Please Upload CSV File", type=['csv'])
 
+#name 
+# Compare all owners names on the Deal against the following fields
+# 1) Payment_person_name, 2) customer_lastname, # 3) customer_firstname.   
+# 
+# 3 separate validations: 
+# 1) full name, 2) first name, 3) last name.  
+# This will catch people charging their own credit card.
+
+
+
+
 if uploaded_file is not None:
+    highticketval = int(highticketstring)
     dfpreclean=pd.read_csv(uploaded_file)
 
     buffer = io.BytesIO()
@@ -142,6 +156,8 @@ if uploaded_file is not None:
 
     memofinal = memo[memo['memo'].str.contains(badwords, case=False)]
 
+    highticket = df[df['total'] >= highticketval]
+
     dup = df
     dup['payment_person_name_next'] = dup['payment_person_name'].shift(1)
     dup['payment_person_name_prev'] = dup['payment_person_name'].shift(-1)
@@ -173,6 +189,7 @@ if uploaded_file is not None:
         pivottablenames.to_excel(writer, sheet_name='Names_Pivot')
         pivottablelastfour.to_excel(writer, sheet_name='Last_Four_Pivot')
         pivottablechannel.to_excel(writer, sheet_name='Chanel_Pivot')
+        highticket.to_excel(writer, sheet_name='High_Ticket')
         dup4.to_excel(writer, sheet_name='Dup_Trans')
 
         # Close the Pandas Excel writer and output the Excel file to the buffer
