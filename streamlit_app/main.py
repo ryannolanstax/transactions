@@ -4,18 +4,26 @@ import numpy as np
 import io
 import xlsxwriter
 
-#name = st.text_input("Enter Name")
-highticketstring = st.text_input("Enter value INTEGER ONLY", key="placeholder")
+
+firstname1 = st.text_input("Enter Owner First Name 1", key="firstname1")
+lastname1 = st.text_input("Enter Owner Last Name 1", key="lastname1")
+
+firstname2 = st.text_input("Enter Owner First Name 2", key="firstname2")
+lastname2 = st.text_input("Enter Owner First Name 2", key="lastname2")
+
+firstname3 = st.text_input("Enter Owner First Name 3", key="firstname3")
+lastname3 = st.text_input("Enter Owner First Name 3", key="lastname3")
+
+firstname4 = st.text_input("Enter Owner First Name 4", key="firstname4")
+lastname4 = st.text_input("Enter Owner First Name 4", key="lastname4")
+
+
+
+highticketstring = st.text_input("Enter value INTEGER ONLY", key="highticket")
 
 uploaded_file = st.file_uploader("Please Upload CSV File", type=['csv'])
 
-#name 
-# Compare all owners names on the Deal against the following fields
-# 1) Payment_person_name, 2) customer_lastname, # 3) customer_firstname.   
-# 
-# 3 separate validations: 
-# 1) full name, 2) first name, 3) last name.  
-# This will catch people charging their own credit card.
+
 
 
 
@@ -158,6 +166,31 @@ if uploaded_file is not None:
 
     highticket = df[df['total'] >= highticketval]
 
+    namecheck = '{}|{}'.format(firstname1,lastname1)   
+
+    if len(firstname2) > 0:
+         namecheck = '|'.join([namecheck, firstname2])
+
+    if len(lastname2) > 0:
+         namecheck = '|'.join([namecheck, lastname2])
+
+    if len(firstname3) > 0:
+         namecheck = '|'.join([namecheck, firstname3])
+
+    if len(lastname3) > 0:
+         namecheck = '|'.join([namecheck, lastname3])
+
+    if len(firstname4) > 0:
+         namecheck = '|'.join([namecheck, firstname4])
+
+    if len(lastname4) > 0:
+         namecheck = '|'.join([namecheck, lastname4])
+         
+    namefinal = df[(df['payment_person_name'].str.contains(namecheck, case=False))|\
+                   (df['customer_lastname'].str.contains(namecheck, case=False))|\
+                   (df['customer_firstname'].str.contains(namecheck, case=False)) 
+                   ]
+
     dup = df
     dup['payment_person_name_next'] = dup['payment_person_name'].shift(1)
     dup['payment_person_name_prev'] = dup['payment_person_name'].shift(-1)
@@ -190,6 +223,7 @@ if uploaded_file is not None:
         pivottablelastfour.to_excel(writer, sheet_name='Last_Four_Pivot')
         pivottablechannel.to_excel(writer, sheet_name='Chanel_Pivot')
         highticket.to_excel(writer, sheet_name='High_Ticket')
+        namefinal.to_excel(writer, sheet_name='Flagged_Names')
         dup4.to_excel(writer, sheet_name='Dup_Trans')
 
         # Close the Pandas Excel writer and output the Excel file to the buffer
