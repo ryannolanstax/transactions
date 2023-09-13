@@ -1,3 +1,7 @@
+
+
+
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -19,7 +23,7 @@ lastname4 = st.text_input("Enter Owner First Name 4", key="lastname4")
 
 
 
-highticketstring = st.text_input("Enter value INTEGER ONLY", key="highticket")
+highticketstring = st.text_input("Enter High Ticket INTEGER ONLY", key="highticket")
 
 uploaded_file = st.file_uploader("Please Upload CSV File", type=['csv'])
 
@@ -34,6 +38,7 @@ if uploaded_file is not None:
 
     buffer = io.BytesIO()
 
+    #Convert total column to currency format with 0 zero decimal places.
     dfpreclean.drop(['id','merchant_id','user_id','customer_id','subtotal','tax','is_manual','success','donation','tip','meta','pre_auth','updated_at','source'], axis=1, inplace=True)
     dfpreclean2 = dfpreclean[(dfpreclean['type'].isna() == False) & (dfpreclean['total'].isna() == False)]
     dfpreclean3 = dfpreclean2[(dfpreclean2['payment_method'] == 'card') | (dfpreclean2['payment_method'] == 'bank')]
@@ -41,9 +46,19 @@ if uploaded_file is not None:
     dfpreclean4["channel"].fillna("blank", inplace = True)
     dfpreclean4["memo"].fillna("blank", inplace = True)
     dfpreclean4["payment_note"].fillna("blank", inplace = True)
-    df = dfpreclean4
-
-
+    
+    df = dfpreclean4.loc[:,['type', 'created_at', 'total', 'payment_person_name', 'customer_firstname', 'customer_lastname',\
+          'payment_last_four', 'last_four', 'payment_method', 'channel', 'memo', 'payment_note', 'reference', \
+          'issuer_auth_code', 'payment_card_type', 'payment_card_exp', 'payment_bank_name', 'payment_bank_type',\
+          'payment_bank_holder_type', 'billing_address_1', 'billing_address_2','billing_address_city', \
+          'billing_address_state', 'billing_address_zip', 'customer_company','customer_email', 'customer_phone', \
+          'customer_address_1','customer_address_2', 'customer_address_city', 'customer_address_state', \
+          'customer_address_zip', 'customer_notes', 'customer_reference', 'customer_created_at', \
+          'customer_updated_at', 'customer_deleted_at', 'gateway_id', 'gateway_name', 'gateway_type', \
+          'gateway_created_at', 'gateway_deleted_at', 'user_name', 'system_admin', 'user_created_at',\
+          'user_updated_at', 'user_deleted_at']]
+    
+    
     totalsum = np.sum(df['total'])
 
     total_transactions = df['type'].count()
@@ -69,44 +84,44 @@ if uploaded_file is not None:
     avg_transactions_sum_per_customer_last_four = np.mean(dfgrouplastfour['tran_sum'])
 
     dfcalc = pd.DataFrame({'totalsum':[totalsum],
-                        'total_transactions':[total_transactions],
-                        'mean_transaction':[mean_transaction],
-                        'median_transaction':[median_transaction],
-                        'max_transaction':[max_transaction],
-                        'total_unique_customer_last_four':[total_unique_customer_last_four],
-                        'total_unique_customer_names':[total_unique_customer_names],
-                        'avg_transactions_count_per_customer_name':[avg_transactions_count_per_customer_name],
-                        'avg_transactions_sum_per_customer_name':[avg_transactions_sum_per_customer_name],
-                        'avg_transactions_count_per_customer_last_four':[avg_transactions_count_per_customer_last_four],
-                        'avg_transactions_sum_per_customer_last_four':[avg_transactions_sum_per_customer_last_four]
+                           'mean_transaction':[mean_transaction],
+                           'median_transaction':[median_transaction], 
+                           'max_transaction':[max_transaction],
+                           'total_transactions':[total_transactions],
+                           'total_unique_customer_names':[total_unique_customer_names],                      
+                           'avg_transactions_count_per_customer_name':[avg_transactions_count_per_customer_name],
+                           'avg_transactions_sum_per_customer_name':[avg_transactions_sum_per_customer_name],
+                           'total_unique_customer_last_four':[total_unique_customer_last_four],
+                           'avg_transactions_count_per_customer_last_four':[avg_transactions_count_per_customer_last_four],
+                           'avg_transactions_sum_per_customer_last_four':[avg_transactions_sum_per_customer_last_four]
                         })
 
     format_mapping = {"totalsum": '${:,.2f}',
-                    "total_transactions": '{:,.0f}', 
-                    "mean_transaction": '${:,.2f}',
-                    "median_transaction": '${:,.2f}',
-                    "max_transaction": '${:,.2f}',
-                    "total_unique_customer_last_four": '{:,.0f}',
-                    "total_unique_customer_names": '{:,.0f}',
-                    "avg_transactions_count_per_customer_name": '{:,.2f}',
-                    "avg_transactions_sum_per_customer_name": '${:,.2f}',
-                    "avg_transactions_count_per_customer_last_four": '{:,.2f}',
-                    "avg_transactions_sum_per_customer_last_four": '${:,.2f}' 
+                      "mean_transaction": '${:,.2f}',
+                      "median_transaction": '${:,.2f}',
+                      "max_transaction": '${:,.2f}',
+                      "total_transactions": '{:,.0f}', 
+                      "total_unique_customer_names": '{:,.0f}',
+                      "avg_transactions_count_per_customer_name": '{:,.2f}',
+                      "avg_transactions_sum_per_customer_name": '${:,.2f}',                  
+                      "total_unique_customer_last_four": '{:,.0f}',
+                      "avg_transactions_count_per_customer_last_four": '{:,.2f}',
+                      "avg_transactions_sum_per_customer_last_four": '${:,.2f}' 
                     }
 
     for key, value in format_mapping.items():
             dfcalc[key] = dfcalc[key].apply(value.format)
 
-    #dfcalc2 = dfcalc.style.format(format_mapping)
+    #Can you make this tab look like the "Pivot Table 1" tab to the right of it that I manually created?  I also uploaded my source CSV file.
+    pivottablenames = pd.pivot_table(df, index=['payment_person_name'], aggfunc={'total': np.sum, 'payment_person_name': 'count',})
+    pivottablenames = pivottablenames.rename(columns={"payment_person_name": "count_of_total", "total": "sum_of_total"})
+    pivottablenames = pivottablenames.loc[:,['sum_of_total', 'count_of_total']]
+    pivottablenames['sum_of_total'] = pivottablenames['sum_of_total'].apply('${:,.2f}'.format)
 
-
-    pivottablenames = pd.pivot_table(df, index=['payment_person_name'], aggfunc={'payment_person_name': 'count', 'total': np.sum})
-    pivottablenames['totalpercent'] = (pivottablenames['total']/totalsum).apply('{:.2%}'.format)
-    pivottablenames['total'] = pivottablenames['total'].apply('${:,.2f}'.format)
-
-    pivottablelastfour = pd.pivot_table(df, index=['payment_last_four'], aggfunc={'payment_last_four': 'count', 'total': np.sum})
-    pivottablelastfour['totalpercent'] = (pivottablelastfour['total']/totalsum).apply('{:.2%}'.format)
-    pivottablelastfour['total'] = pivottablelastfour['total'].apply('${:,.2f}'.format)
+    pivottablelastfour = pd.pivot_table(df, index=['payment_last_four'], aggfunc={ 'total': np.sum, 'payment_last_four': 'count'})
+    pivottablelastfour = pivottablelastfour.rename(columns={"payment_last_four": "count_of_total", "total": "sum_of_total"})
+    pivottablelastfour = pivottablelastfour.loc[:,['sum_of_total', 'count_of_total']]
+    pivottablelastfour['sum_of_total'] = pivottablelastfour['sum_of_total'].apply('${:,.2f}'.format)
 
     pivottablechannel = pd.pivot_table(df, index=['channel'], aggfunc={'payment_last_four': 'count', 'total': np.sum})
     pivottablechannel['totalpercent'] = (pivottablechannel['total']/totalsum).apply('{:.2%}'.format)
@@ -166,6 +181,11 @@ if uploaded_file is not None:
 
     highticket = df[df['total'] >= highticketval]
 
+
+     #Convert total column to currency format with 0 zero decimal places.
+
+     #Re-order columns as follows:  payment_person name, created_at, total, last_four, type channel, memo, payment_note, reference, no preference to order for remaining columns.
+
     namecheck = '{}|{}'.format(firstname1,lastname1)   
 
     if len(firstname2) > 0:
@@ -185,13 +205,42 @@ if uploaded_file is not None:
 
     if len(lastname4) > 0:
          namecheck = '|'.join([namecheck, lastname4])
+
+
          
     namefinal = df[(df['payment_person_name'].str.contains(namecheck, case=False))|\
                    (df['customer_lastname'].str.contains(namecheck, case=False))|\
                    (df['customer_firstname'].str.contains(namecheck, case=False)) 
                    ]
+    
 
-    dup = df
+
+    namefinal2 = namefinal.loc[:,['payment_person_name', 'customer_firstname', 'customer_lastname', 'created_at', 'total', \
+                'payment_last_four', 'last_four', 'type', 'channel', 'memo', 'payment_note', 'reference', \
+                'payment_method', 'issuer_auth_code', 'payment_card_type', 'payment_card_exp', 'payment_bank_name', \
+                'payment_bank_type','payment_bank_holder_type', 'billing_address_1', 'billing_address_2', \
+                'billing_address_city', 'billing_address_state', 'billing_address_zip', 'customer_company',\
+                'customer_email', 'customer_phone', 'customer_address_1','customer_address_2', 'customer_address_city',
+                'customer_address_state', 'customer_address_zip', 'customer_notes', 'customer_reference', \
+                'customer_created_at', 'customer_updated_at', 'customer_deleted_at', 'gateway_id', 'gateway_name', \
+                'gateway_type', 'gateway_created_at', 'gateway_deleted_at', 'user_name', 'system_admin', \
+                'user_created_at', 'user_updated_at', 'user_deleted_at']]
+
+
+
+#Convert total column to currency format with 0 zero decimal places.
+
+    dup = df.loc[:,['payment_person_name', 'customer_firstname', 'customer_lastname', 'created_at', 'total', \
+                'payment_last_four', 'last_four', 'type', 'channel', 'memo', 'payment_note', 'reference', \
+                'payment_method', 'issuer_auth_code', 'payment_card_type', 'payment_card_exp', 'payment_bank_name', \
+                'payment_bank_type','payment_bank_holder_type', 'billing_address_1', 'billing_address_2', \
+                'billing_address_city', 'billing_address_state', 'billing_address_zip', 'customer_company',\
+                'customer_email', 'customer_phone', 'customer_address_1','customer_address_2', 'customer_address_city',
+                'customer_address_state', 'customer_address_zip', 'customer_notes', 'customer_reference', \
+                'customer_created_at', 'customer_updated_at', 'customer_deleted_at', 'gateway_id', 'gateway_name', \
+                'gateway_type', 'gateway_created_at', 'gateway_deleted_at', 'user_name', 'system_admin', \
+                'user_created_at', 'user_updated_at', 'user_deleted_at']]
+    
     dup['payment_person_name_next'] = dup['payment_person_name'].shift(1)
     dup['payment_person_name_prev'] = dup['payment_person_name'].shift(-1)
     dup['payment_last_four_next'] = dup['payment_last_four'].shift(1)
@@ -209,8 +258,11 @@ if uploaded_file is not None:
             payment_person_name == payment_person_name_prev | \
             payment_last_four == payment_last_four_next | \
             payment_last_four == payment_last_four_prev')
+    
 
-
+    dup4['total'] = dup4['total'].apply('${:,.0f}'.format)
+    namefinal['total'] = namefinal['total'].apply('${:,.0f}'.format)
+    df['total'] = df['total'].apply('${:,.0f}'.format)
 
     # Create a Pandas Excel writer using XlsxWriter as the engine.
     with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
@@ -223,7 +275,7 @@ if uploaded_file is not None:
         pivottablelastfour.to_excel(writer, sheet_name='Last_Four_Pivot')
         pivottablechannel.to_excel(writer, sheet_name='Chanel_Pivot')
         highticket.to_excel(writer, sheet_name='High_Ticket')
-        namefinal.to_excel(writer, sheet_name='Flagged_Names')
+        namefinal2.to_excel(writer, sheet_name='Flagged_Names')
         dup4.to_excel(writer, sheet_name='Dup_Trans')
 
         # Close the Pandas Excel writer and output the Excel file to the buffer
