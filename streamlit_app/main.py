@@ -1,7 +1,3 @@
-
-
-
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -180,6 +176,18 @@ if uploaded_file is not None:
     memofinal = memo[memo['memo'].str.contains(badwords, case=False)]
 
     highticket = df[df['total'] >= highticketval]
+    highticket = highticket.loc[:,['payment_person_name', 'customer_firstname', 'customer_lastname', 'created_at', 'total', \
+                'payment_last_four', 'last_four', 'type', 'channel', 'memo', 'payment_note', 'reference', \
+                'payment_method', 'issuer_auth_code', 'payment_card_type', 'payment_card_exp', 'payment_bank_name', \
+                'payment_bank_type','payment_bank_holder_type', 'billing_address_1', 'billing_address_2', \
+                'billing_address_city', 'billing_address_state', 'billing_address_zip', 'customer_company',\
+                'customer_email', 'customer_phone', 'customer_address_1','customer_address_2', 'customer_address_city',
+                'customer_address_state', 'customer_address_zip', 'customer_notes', 'customer_reference', \
+                'customer_created_at', 'customer_updated_at', 'customer_deleted_at', 'gateway_id', 'gateway_name', \
+                'gateway_type', 'gateway_created_at', 'gateway_deleted_at', 'user_name', 'system_admin', \
+                'user_created_at', 'user_updated_at', 'user_deleted_at']]
+    
+    highticket = highticket.sort_values(by='total', ascending=False)
 
 
      #Convert total column to currency format with 0 zero decimal places.
@@ -262,6 +270,7 @@ if uploaded_file is not None:
 
     dup4['total'] = dup4['total'].apply('${:,.0f}'.format)
     namefinal['total'] = namefinal['total'].apply('${:,.0f}'.format)
+    highticket['total'] = highticket['total'].apply('${:,.0f}'.format)
     df['total'] = df['total'].apply('${:,.0f}'.format)
 
     # Create a Pandas Excel writer using XlsxWriter as the engine.
