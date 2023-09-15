@@ -277,15 +277,15 @@ if uploaded_file is not None:
     with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
         # Write each dataframe to a different worksheet.
         df.to_excel(writer, sheet_name='Clean_Data')
+        highticket.to_excel(writer, sheet_name='High_Ticket')
         dfcalc.to_excel(writer, sheet_name='Calculations')
-        payment_note_final.to_excel(writer, sheet_name='Flagged_Payment_Notes')
         memofinal.to_excel(writer, sheet_name='Negative_Memo')
+        payment_note_final.to_excel(writer, sheet_name='Flagged_Payment_Notes')
+        namefinal2.to_excel(writer, sheet_name='Flagged_Names')
+        pivottablechannel.to_excel(writer, sheet_name='Chanel_Pivot')
+        dup4.to_excel(writer, sheet_name='Dup_Trans')
         pivottablenames.to_excel(writer, sheet_name='Names_Pivot')
         pivottablelastfour.to_excel(writer, sheet_name='Last_Four_Pivot')
-        pivottablechannel.to_excel(writer, sheet_name='Chanel_Pivot')
-        highticket.to_excel(writer, sheet_name='High_Ticket')
-        namefinal2.to_excel(writer, sheet_name='Flagged_Names')
-        dup4.to_excel(writer, sheet_name='Dup_Trans')
 
         # Close the Pandas Excel writer and output the Excel file to the buffer
         writer.close()
