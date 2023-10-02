@@ -253,6 +253,8 @@ def download_df():
                     'customer_created_at', 'customer_updated_at', 'customer_deleted_at', 'gateway_id', 'gateway_name', \
                     'gateway_type', 'gateway_created_at', 'gateway_deleted_at', 'user_name', 'system_admin', \
                     'user_created_at', 'user_updated_at', 'user_deleted_at']]
+        
+        namefinal3 = namefinal2.query("total > 1")
 
     #Convert total column to currency format with 0 zero decimal places.
 
@@ -296,7 +298,7 @@ def download_df():
             "Calculations": dfcalc,
             "Negative_Memo": memofinal,
             "Flagged_Payment_Notes": payment_note_final,
-            "Flagged_Names": namefinal2,
+            "Flagged_Names": namefinal3,
             "Chanel_Pivot": pivottablechannel,
             "Dup_Trans": dup4,
             "Names_Pivot": pivottablenames,
